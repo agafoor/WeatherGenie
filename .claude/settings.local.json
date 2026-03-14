@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npx create-next-app@latest weather-genie --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npm init -y)",
+      "Bash(npm install next@latest react@latest react-dom@latest typescript@latest @types/react @types/node)",
+      "Bash(yes)",
+      "Bash(npm install @supabase/supabase-js @supabase/ssr @anthropic-ai/sdk lucide-react next-themes react-markdown remark-gfm rehype-highlight pdf-parse mammoth js-tiktoken class-variance-authority clsx tailwind-merge)",
+      "Bash(npm install -D @types/pdf-parse)",
+      "Bash(npx shadcn@latest init -d)"
+    ]
+  }
+}
