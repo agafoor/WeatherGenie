@@ -6,9 +6,12 @@ export async function extractText(
 ): Promise<string> {
   switch (fileType) {
     case "pdf": {
-      // pdf-parse v1 has a simple default export function
+      // Import the internal module directly to avoid pdf-parse's index.js
+      // entry point, which checks `!module.parent` and tries to load
+      // ./test/data/05-versions-space.pdf — a path that doesn't exist when
+      // Turbopack bundles the package on Vercel.
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require("pdf-parse");
+      const pdfParse = require("pdf-parse/lib/pdf-parse");
       const result = await pdfParse(buffer);
       return result.text;
     }
