@@ -6,14 +6,14 @@ import { ChatInput } from "@/components/chat/ChatInput";
 describe("ChatInput", () => {
   it("renders the textarea and send button", () => {
     render(<ChatInput onSend={vi.fn()} />);
-    expect(screen.getByPlaceholderText("Ask about weather...")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Ask about weather, climate, or forecasts...")).toBeInTheDocument();
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("calls onSend with trimmed text when send button is clicked", async () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} />);
-    const textarea = screen.getByPlaceholderText("Ask about weather...");
+    const textarea = screen.getByPlaceholderText("Ask about weather, climate, or forecasts...");
     await userEvent.type(textarea, "  What is rain?  ");
     fireEvent.click(screen.getByRole("button"));
     expect(onSend).toHaveBeenCalledWith("What is rain?");
@@ -22,7 +22,7 @@ describe("ChatInput", () => {
   it("calls onSend when Enter is pressed (without Shift)", async () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} />);
-    const textarea = screen.getByPlaceholderText("Ask about weather...");
+    const textarea = screen.getByPlaceholderText("Ask about weather, climate, or forecasts...");
     await userEvent.type(textarea, "Hello{Enter}");
     expect(onSend).toHaveBeenCalledWith("Hello");
   });
@@ -30,14 +30,14 @@ describe("ChatInput", () => {
   it("does NOT call onSend when Shift+Enter is pressed", async () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} />);
-    const textarea = screen.getByPlaceholderText("Ask about weather...");
+    const textarea = screen.getByPlaceholderText("Ask about weather, climate, or forecasts...");
     await userEvent.type(textarea, "Line one{Shift>}{Enter}{/Shift}");
     expect(onSend).not.toHaveBeenCalled();
   });
 
   it("clears the textarea after sending", async () => {
     render(<ChatInput onSend={vi.fn()} />);
-    const textarea = screen.getByPlaceholderText("Ask about weather...") as HTMLTextAreaElement;
+    const textarea = screen.getByPlaceholderText("Ask about weather, climate, or forecasts...") as HTMLTextAreaElement;
     await userEvent.type(textarea, "Hello");
     fireEvent.click(screen.getByRole("button"));
     expect(textarea.value).toBe("");
@@ -46,7 +46,7 @@ describe("ChatInput", () => {
   it("does not call onSend when input is empty or whitespace", async () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} />);
-    const textarea = screen.getByPlaceholderText("Ask about weather...");
+    const textarea = screen.getByPlaceholderText("Ask about weather, climate, or forecasts...");
     await userEvent.type(textarea, "   ");
     fireEvent.click(screen.getByRole("button"));
     expect(onSend).not.toHaveBeenCalled();

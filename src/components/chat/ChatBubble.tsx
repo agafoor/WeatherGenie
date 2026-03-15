@@ -34,10 +34,10 @@ export function ChatBubble({ message, onSourceClick }: ChatBubbleProps) {
 
       <div
         className={cn(
-          "max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 shadow-sm",
+          "max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3",
           isUser
-            ? "bg-gradient-to-br from-sky-500 to-sky-600 text-white rounded-br-sm"
-            : "bg-white dark:bg-slate-800 border border-sky-100 dark:border-sky-900/40 rounded-bl-sm"
+            ? "bg-gradient-to-br from-sky-400 to-sky-600 text-white rounded-br-sm shadow-md shadow-sky-300/25 dark:shadow-sky-900/40"
+            : "glass border border-sky-200/40 dark:border-white/8 rounded-bl-sm shadow-sm"
         )}
       >
         {!isUser && (
@@ -118,12 +118,12 @@ export function ChatBubble({ message, onSourceClick }: ChatBubbleProps) {
 
         {/* Source badges */}
         {!isUser && message.sources.length > 0 && !message.isStreaming && (
-          <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-sky-100 dark:border-sky-900/40">
+          <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-sky-200/30 dark:border-white/5">
             {message.sources.map((source, i) => (
               <button
                 key={source.chunk_id}
                 onClick={() => onSourceClick?.(i)}
-                className="inline-flex items-center gap-1 text-[10px] bg-sky-50 hover:bg-sky-100 dark:bg-sky-900/30 dark:hover:bg-sky-900/50 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800 transition-colors"
+                className="inline-flex items-center gap-1 text-[10px] bg-sky-100/60 hover:bg-sky-200/60 dark:bg-sky-900/20 dark:hover:bg-sky-900/40 px-2 py-0.5 rounded-full border border-sky-200/60 dark:border-sky-800/40 transition-colors"
               >
                 <span className="font-bold text-sky-500">[{i + 1}]</span>
                 <span className="truncate max-w-[120px] text-foreground/70">{source.title}</span>

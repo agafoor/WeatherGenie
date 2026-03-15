@@ -14,15 +14,15 @@ export function SourceCard({ source, index, isHighlighted }: SourceCardProps) {
 
   return (
     <Card
-      className={`transition-all ${
+      className={`transition-all border-sky-200/40 dark:border-white/8 ${
         isHighlighted
-          ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950"
+          ? "ring-2 ring-sky-400 bg-sky-50/80 dark:bg-sky-900/30"
           : ""
       }`}
     >
       <CardContent className="p-3">
         <div className="flex items-start gap-2">
-          <div className="flex items-center justify-center h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-[10px] font-bold shrink-0 mt-0.5">
+          <div className="flex items-center justify-center h-5 w-5 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 text-[10px] font-bold shrink-0 mt-0.5">
             {index + 1}
           </div>
           <div className="min-w-0 flex-1">

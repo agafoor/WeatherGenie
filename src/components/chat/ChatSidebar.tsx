@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, MessageSquare, Trash2 } from "lucide-react";
+import { Plus, MessageSquare, Trash2, CloudRain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -36,12 +36,21 @@ export function ChatSidebar({
   onSelectGenieRoom,
 }: ChatSidebarProps) {
   return (
-    <div className="w-72 border-r border-sky-100 dark:border-sky-900/40 bg-sidebar flex flex-col h-full">
+    <div className="w-72 border-r border-sky-200/40 dark:border-white/5 glass flex flex-col h-full relative overflow-hidden">
+      {/* Decorative cloud silhouettes at the bottom of sidebar */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 opacity-[0.04] dark:opacity-[0.03]" aria-hidden>
+        <svg viewBox="0 0 288 96" className="w-full h-full" preserveAspectRatio="xMidYMax slice">
+          <ellipse cx="60" cy="80" rx="70" ry="28" fill="currentColor" />
+          <ellipse cx="180" cy="85" rx="90" ry="32" fill="currentColor" />
+          <ellipse cx="260" cy="82" rx="50" ry="22" fill="currentColor" />
+        </svg>
+      </div>
+
       {/* Header */}
-      <div className="p-3 border-b border-sky-100 dark:border-sky-900/40">
+      <div className="p-3 border-b border-sky-200/30 dark:border-white/5">
         <Button
           onClick={onNewChat}
-          className="w-full gap-2 bg-sky-500 hover:bg-sky-600 text-white shadow-sm shadow-sky-200 dark:shadow-sky-900/40"
+          className="w-full gap-2 bg-gradient-to-r from-sky-500 to-sky-400 hover:from-sky-600 hover:to-sky-500 text-white shadow-md shadow-sky-300/30 dark:shadow-sky-900/40 transition-all hover:shadow-lg hover:shadow-sky-300/40"
           size="sm"
         >
           <Plus className="h-4 w-4" />
@@ -50,7 +59,8 @@ export function ChatSidebar({
       </div>
 
       {/* Conversation label */}
-      <div className="px-3 pt-3 pb-1">
+      <div className="px-3 pt-3 pb-1 flex items-center gap-1.5">
+        <CloudRain className="h-3 w-3 text-sky-400/60" />
         <p className="text-[10px] font-semibold uppercase tracking-widest text-sky-400 dark:text-sky-600">
           Conversations
         </p>

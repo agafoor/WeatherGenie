@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Square } from "lucide-react";
+import { Send, Square, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ export function ChatInput({
   }
 
   return (
-    <div className="border-t border-sky-100 dark:border-sky-900/40 bg-gradient-to-b from-white to-sky-50/30 dark:from-slate-900 dark:to-slate-950 px-4 py-3">
+    <div className="border-t border-sky-200/30 dark:border-white/5 glass px-4 py-3 z-10">
       <div className="flex items-end gap-2 max-w-3xl mx-auto">
         <div className="relative flex-1">
           <textarea
@@ -58,19 +58,19 @@ export function ChatInput({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about weather..."
+            placeholder="Ask about weather, climate, or forecasts..."
             disabled={disabled}
             rows={1}
-            className="w-full resize-none rounded-2xl border border-sky-200 dark:border-sky-800 bg-white dark:bg-slate-800 px-4 py-2.5 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 placeholder:text-sky-300 dark:placeholder:text-sky-700 disabled:opacity-50 shadow-sm transition-shadow focus:shadow-md"
+            className="w-full resize-none rounded-2xl border border-sky-200/60 dark:border-white/10 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm px-4 py-2.5 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400/50 placeholder:text-sky-300 dark:placeholder:text-sky-700 disabled:opacity-50 shadow-sm transition-all focus:shadow-md focus:shadow-sky-200/20"
           />
         </div>
         <Button
           size="icon"
           className={cn(
-            "h-10 w-10 shrink-0 rounded-2xl shadow-sm transition-all",
+            "h-10 w-10 shrink-0 rounded-2xl shadow-md transition-all",
             isStreaming
-              ? "bg-red-500 hover:bg-red-600 shadow-red-200 dark:shadow-red-900/40"
-              : "bg-sky-500 hover:bg-sky-600 shadow-sky-200 dark:shadow-sky-900/40"
+              ? "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-300/30 dark:shadow-red-900/40"
+              : "bg-gradient-to-br from-sky-400 to-sky-600 hover:from-sky-500 hover:to-sky-700 shadow-sky-300/30 dark:shadow-sky-900/40 hover:shadow-lg hover:shadow-sky-300/40"
           )}
           onClick={handleSubmit}
           disabled={disabled && !isStreaming}
@@ -82,8 +82,9 @@ export function ChatInput({
           )}
         </Button>
       </div>
-      <p className="text-center text-[10px] text-sky-300 dark:text-sky-700 mt-2">
-        Press <kbd className="font-mono">Enter</kbd> to send · <kbd className="font-mono">Shift+Enter</kbd> for new line
+      <p className="text-center text-[10px] text-sky-400/60 dark:text-sky-600/60 mt-2 flex items-center justify-center gap-1">
+        <Zap className="h-2.5 w-2.5" />
+        <kbd className="font-mono">Enter</kbd> to send · <kbd className="font-mono">Shift+Enter</kbd> for new line
       </p>
     </div>
   );

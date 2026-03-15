@@ -9,6 +9,7 @@ import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { UserMenu } from "@/components/shared/UserMenu";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { WeatherBackground } from "@/components/shared/WeatherBackground";
 import { ChatSidebar } from "./ChatSidebar";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
@@ -160,14 +161,17 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
       .flatMap((m) => m.sources);
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Desktop sidebar */}
+    <div className="relative flex h-screen overflow-hidden">
+      {/* Animated weather background */}
+      <WeatherBackground />
+
+      {/* Desktop sidebar — glass effect */}
       <div className="hidden md:flex">{sidebarContent}</div>
 
       {/* Main area */}
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-sky-50 to-white dark:from-slate-900 dark:to-slate-950 shrink-0">
+        {/* Header — frosted glass bar */}
+        <header className="flex items-center justify-between px-4 py-3 border-b border-sky-200/40 dark:border-white/5 glass shrink-0 z-10">
           <div className="flex items-center gap-2">
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger
