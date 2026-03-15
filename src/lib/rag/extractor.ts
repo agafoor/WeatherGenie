@@ -6,14 +6,14 @@ export async function extractText(
 ): Promise<string> {
   switch (fileType) {
     case "pdf": {
-      // Import the internal module directly to avoid pdf-parse's index.js
-      // entry point, which checks `!module.parent` and tries to load
-      // ./test/data/05-versions-space.pdf — a path that doesn't exist when
-      // Turbopack bundles the package on Vercel.
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require("pdf-parse/lib/pdf-parse");
-      const result = await pdfParse(buffer);
-      return result.text;
+      // unpdf is a serverless-safe PDF extractor built on Mozilla PDF.js.
+      // Unlike pdf-parse, it does not read test files at module evaluation
+      // time and works correctly when bundled by Turbopack on Vercel.
+      const { extractText: pdfExtractText } = await import("unpdf");
+      const { text } = await pdfExtractText(new Uint8Array(buffer), {
+        mergePages: true,
+      });
+      return text ?? "";
     }
     case "docx": {
       const result = await mammoth.extractRawText({ buffer });
