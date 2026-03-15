@@ -11,7 +11,7 @@ export async function generateEmbeddings(
     },
     body: JSON.stringify({
       input: texts,
-      model: "voyage-3-lite",
+      model: "voyage-3",
     }),
   });
 
