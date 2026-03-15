@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatBubble } from "./ChatBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import type { ChatMessage } from "@/types/chat";
@@ -18,14 +17,16 @@ export function ChatMessages({
   onSourceClick,
 }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isStreaming]);
 
   return (
-    <ScrollArea className="flex-1">
-      <div className="max-w-3xl mx-auto py-4">
+    // Native overflow-y-auto is far more reliable than ScrollArea in a flex column
+    <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div className="max-w-3xl mx-auto py-6 px-2">
         {messages.map((message) => (
           <ChatBubble
             key={message.id}
@@ -38,6 +39,6 @@ export function ChatMessages({
           !messages[messages.length - 1]?.content && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
-    </ScrollArea>
+    </div>
   );
 }

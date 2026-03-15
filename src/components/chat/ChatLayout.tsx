@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,11 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
   const [showSources, setShowSources] = useState(false);
   const [highlightedSource, setHighlightedSource] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // When a brand-new conversation is created mid-stream, setConversationId fires
+  // the "load messages" effect before isStreaming is set to true, wiping the
+  // optimistic assistant message. This ref lets the effect skip that one reload.
+  const skipNextLoadRef = useRef(false);
   const router = useRouter();
   const { profile } = useAuth();
   const supabase = createClient();
@@ -57,8 +62,14 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
     conversationId,
     genieRoomId,
     onConversationCreated: (id) => {
+      // Signal the load-messages effect to skip its next run — the stream is
+      // still active and the optimistic assistant message must not be wiped.
+      skipNextLoadRef.current = true;
       setConversationId(id);
-      router.push(`/chat/${id}`, { scroll: false });
+      // Use pushState instead of router.push to avoid unmounting this component
+      // (and aborting the in-flight SSE stream) during the navigation from
+      // /chat → /chat/[id]. Next.js App Router supports direct history API calls.
+      window.history.pushState(null, "", `/chat/${id}`);
     },
     onTitleGenerated: (title) => {
       if (conversationId) {
@@ -80,9 +91,17 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
     loadRooms();
   }, []);
 
-  // Load messages when conversation changes
+  // Load messages when conversation changes.
+  // Skip if a new conversation was just created mid-stream — the optimistic
+  // messages are still being written to by the SSE reader and must not be
+  // replaced. The ref is consumed (reset) on the first skip so normal
+  // conversation switching still loads from the DB.
   useEffect(() => {
     if (conversationId) {
+      if (skipNextLoadRef.current) {
+        skipNextLoadRef.current = false;
+        return;
+      }
       loadMessages(conversationId);
     } else {
       clearMessages();
@@ -109,11 +128,19 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
     }
   }
 
-  function handleSourceClick(index: number) {
+  const handleSourceClick = useCallback((index: number) => {
     setShowSources(true);
     setHighlightedSource(index);
-    setTimeout(() => setHighlightedSource(null), 2000);
-  }
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(() => setHighlightedSource(null), 2000);
+  }, []);
+
+  // Clean up the highlight timer on unmount
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    };
+  }, []);
 
   const sidebarContent = (
     <ChatSidebar
@@ -140,7 +167,7 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
       {/* Main area */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 py-2 border-b">
+        <header className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-sky-50 to-white dark:from-slate-900 dark:to-slate-950 shrink-0">
           <div className="flex items-center gap-2">
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger
@@ -168,7 +195,7 @@ export function ChatLayout({ initialConversationId }: ChatLayoutProps) {
 
         {/* Chat content */}
         <div className="flex flex-1 min-h-0">
-          <div className="flex flex-col flex-1 min-w-0">
+          <div className="flex flex-col flex-1 min-w-0 min-h-0">
             {messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center gap-6 p-4">
                 <EmptyState

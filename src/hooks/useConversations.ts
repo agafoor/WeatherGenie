@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Conversation } from "@/types/database";
 
 export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const fetchConversations = useCallback(async () => {
     const { data } = await supabase
@@ -16,7 +16,7 @@ export function useConversations() {
       .order("updated_at", { ascending: false });
     setConversations(data ?? []);
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     fetchConversations();

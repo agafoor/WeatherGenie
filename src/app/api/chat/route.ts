@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   const { readable, sendEvent, close } = createSSEStream();
 
-  // Process asynchronously
+  // Process asynchronously — .catch() prevents unhandledRejection if client disconnects
   (async () => {
     try {
       // Get available genie rooms for intent classification
@@ -43,11 +43,10 @@ export async function POST(request: Request) {
         .select("*")
         .eq("is_active", true);
 
-      // Classify intent
-      const intent = await classifyIntent(
-        message,
-        (genieRooms as GenieRoom[]) || []
-      );
+      // Classify intent (skip classification if Genie room explicitly selected)
+      const intent = genieRoomId
+        ? "analytics"
+        : await classifyIntent(message, (genieRooms as GenieRoom[]) || []);
       await sendEvent("intent", intent);
 
       // Get conversation history (last 10 messages for context)
@@ -69,7 +68,35 @@ export async function POST(request: Request) {
       let sources: MessageSource[] = [];
       let genieMetadata = null;
 
-      if (intent === "research") {
+      if (genieRoomId) {
+        // User explicitly selected a Genie Room — route directly to Genie regardless of intent
+        const room = genieRooms?.find(
+          (r: GenieRoom) => r.id === genieRoomId
+        ) as GenieRoom | undefined;
+
+        if (room) {
+          try {
+            const result = await queryGenie(room, message);
+            const formatted = formatGenieResponse(result);
+            fullResponse = formatted.text;
+            genieMetadata = formatted.metadata;
+
+            const chunks = fullResponse.match(/.{1,50}/g) || [fullResponse];
+            for (const chunk of chunks) {
+              await sendEvent("delta", chunk);
+            }
+          } catch (error) {
+            fullResponse =
+              "I wasn't able to query the data. " +
+              (error instanceof Error ? error.message : "Please try again.");
+            await sendEvent("delta", fullResponse);
+          }
+        } else {
+          fullResponse =
+            "The selected Genie Room could not be found. Please select another from the sidebar.";
+          await sendEvent("delta", fullResponse);
+        }
+      } else if (intent === "research") {
         // RAG pipeline
         const chunks = await retrieveChunks(message, admin);
         sources = chunks.map((chunk) => ({
@@ -94,35 +121,6 @@ export async function POST(request: Request) {
             await sendEvent("error", { message: error.message });
           },
         });
-      } else if (intent === "analytics" && genieRoomId) {
-        // Databricks Genie pipeline
-        const room = genieRooms?.find(
-          (r: GenieRoom) => r.id === genieRoomId
-        ) as GenieRoom | undefined;
-
-        if (room) {
-          try {
-            const result = await queryGenie(room, message);
-            const formatted = formatGenieResponse(result);
-            fullResponse = formatted.text;
-            genieMetadata = formatted.metadata;
-
-            // Send response as deltas for consistency
-            const chunks = fullResponse.match(/.{1,50}/g) || [fullResponse];
-            for (const chunk of chunks) {
-              await sendEvent("delta", chunk);
-            }
-          } catch (error) {
-            fullResponse =
-              "I wasn't able to query the data. " +
-              (error instanceof Error ? error.message : "Please try again.");
-            await sendEvent("delta", fullResponse);
-          }
-        } else {
-          fullResponse =
-            "Please select a Genie Room from the sidebar to run data analytics queries.";
-          await sendEvent("delta", fullResponse);
-        }
       } else {
         // General chat
         await streamGeneralChat(chatMessages, {
@@ -176,7 +174,11 @@ export async function POST(request: Request) {
     } finally {
       await close();
     }
-  })();
+  })().catch(() => {
+    // Top-level safety net: swallow any error that escaped the inner try/catch
+    // (e.g. ResponseAborted when the client disconnects mid-stream)
+    close();
+  });
 
   return createSSEResponse(readable);
 }

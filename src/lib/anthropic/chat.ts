@@ -3,9 +3,9 @@ import { WEATHER_EXPERT_SYSTEM_PROMPT, RAG_SYSTEM_PROMPT } from "./prompts";
 import type { MessageSource } from "@/types/database";
 
 interface StreamCallbacks {
-  onDelta: (text: string) => void;
-  onDone: () => void;
-  onError: (error: Error) => void;
+  onDelta: (text: string) => Promise<void> | void;
+  onDone: () => Promise<void> | void;
+  onError: (error: Error) => Promise<void> | void;
 }
 
 export async function streamGeneralChat(
@@ -27,12 +27,12 @@ export async function streamGeneralChat(
         event.type === "content_block_delta" &&
         event.delta.type === "text_delta"
       ) {
-        callbacks.onDelta(event.delta.text);
+        await callbacks.onDelta(event.delta.text);
       }
     }
-    callbacks.onDone();
+    await callbacks.onDone();
   } catch (error) {
-    callbacks.onError(error as Error);
+    await callbacks.onError(error as Error);
   }
 }
 
@@ -65,11 +65,11 @@ export async function streamRAGChat(
         event.type === "content_block_delta" &&
         event.delta.type === "text_delta"
       ) {
-        callbacks.onDelta(event.delta.text);
+        await callbacks.onDelta(event.delta.text);
       }
     }
-    callbacks.onDone();
+    await callbacks.onDone();
   } catch (error) {
-    callbacks.onError(error as Error);
+    await callbacks.onError(error as Error);
   }
 }

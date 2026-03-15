@@ -4,15 +4,19 @@ export function createSSEStream() {
   const writer = stream.writable.getWriter();
 
   async function sendEvent(type: string, data: unknown) {
-    const payload = `data: ${JSON.stringify({ type, data })}\n\n`;
-    await writer.write(encoder.encode(payload));
+    try {
+      const payload = `data: ${JSON.stringify({ type, data })}\n\n`;
+      await writer.write(encoder.encode(payload));
+    } catch {
+      // Client disconnected or stream already closed — nothing to do
+    }
   }
 
   async function close() {
     try {
       await writer.close();
     } catch {
-      // Already closed
+      // Already closed or client disconnected
     }
   }
 

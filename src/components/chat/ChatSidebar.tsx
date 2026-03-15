@@ -36,37 +36,61 @@ export function ChatSidebar({
   onSelectGenieRoom,
 }: ChatSidebarProps) {
   return (
-    <div className="w-72 border-r bg-muted/30 flex flex-col h-full">
-      <div className="p-3">
-        <Button onClick={onNewChat} className="w-full gap-2" size="sm">
+    <div className="w-72 border-r border-sky-100 dark:border-sky-900/40 bg-sidebar flex flex-col h-full">
+      {/* Header */}
+      <div className="p-3 border-b border-sky-100 dark:border-sky-900/40">
+        <Button
+          onClick={onNewChat}
+          className="w-full gap-2 bg-sky-500 hover:bg-sky-600 text-white shadow-sm shadow-sky-200 dark:shadow-sky-900/40"
+          size="sm"
+        >
           <Plus className="h-4 w-4" />
           New Chat
         </Button>
       </div>
 
+      {/* Conversation label */}
+      <div className="px-3 pt-3 pb-1">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-sky-400 dark:text-sky-600">
+          Conversations
+        </p>
+      </div>
+
       <ScrollArea className="flex-1 px-2">
         <div className="space-y-0.5 pb-2">
+          {conversations.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-6 px-3">
+              No conversations yet. Start a new chat!
+            </p>
+          )}
           {conversations.map((conv) => (
             <div
               key={conv.id}
               className={cn(
-                "group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors",
+                "group flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm cursor-pointer transition-all",
                 activeConversationId === conv.id
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-accent/50"
+                  ? "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-100 shadow-sm"
+                  : "text-foreground/70 hover:bg-sky-50 dark:hover:bg-sky-900/20 hover:text-foreground"
               )}
               onClick={() => onSelectConversation(conv.id)}
             >
-              <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span className="truncate flex-1">{conv.title}</span>
+              <MessageSquare
+                className={cn(
+                  "h-4 w-4 shrink-0 transition-colors",
+                  activeConversationId === conv.id
+                    ? "text-sky-500"
+                    : "text-muted-foreground group-hover:text-sky-400"
+                )}
+              />
+              <span className="truncate flex-1 text-xs font-medium">{conv.title}</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteConversation(conv.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30"
               >
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500 transition-colors" />
               </button>
             </div>
           ))}
@@ -75,9 +99,9 @@ export function ChatSidebar({
 
       {genieRooms.length > 0 && (
         <>
-          <Separator />
+          <Separator className="bg-sky-100 dark:bg-sky-900/40" />
           <div className="p-3 space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-sky-400 dark:text-sky-600">
               Data Source
             </label>
             <Select
@@ -86,7 +110,7 @@ export function ChatSidebar({
                 onSelectGenieRoom(!v || v === "none" ? undefined : v)
               }
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs border-sky-200 dark:border-sky-800 focus:ring-sky-400">
                 <SelectValue placeholder="Select Genie Room" />
               </SelectTrigger>
               <SelectContent>

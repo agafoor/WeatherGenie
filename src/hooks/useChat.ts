@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { ChatMessage, IntentType, StreamEvent } from "@/types/chat";
 import type { MessageSource } from "@/types/database";
@@ -24,6 +24,13 @@ export function useChat({
   const [currentSources, setCurrentSources] = useState<MessageSource[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const supabase = createClient();
+
+  // Abort any in-flight request when the hook unmounts
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const loadMessages = useCallback(async (convId: string) => {
     const { data } = await supabase
@@ -222,14 +229,14 @@ export function useChat({
     }
   }
 
-  function stopStreaming() {
+  const stopStreaming = useCallback(() => {
     abortControllerRef.current?.abort();
     setIsStreaming(false);
-  }
+  }, []);
 
-  function clearMessages() {
+  const clearMessages = useCallback(() => {
     setMessages([]);
-  }
+  }, []);
 
   return {
     messages,

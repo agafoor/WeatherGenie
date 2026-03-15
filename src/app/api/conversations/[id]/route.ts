@@ -33,6 +33,17 @@ export async function DELETE(
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Verify the conversation belongs to this user before deleting
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("user_id")
+    .eq("id", id)
+    .single();
+
+  if (!conversation) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (conversation.user_id !== user.id)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   const { error } = await supabase
     .from("conversations")
     .delete()
