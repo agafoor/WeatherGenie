@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { processDocument } from "@/lib/rag/pipeline";
@@ -87,10 +88,14 @@ export async function POST(request: Request) {
     );
   }
 
-  // Process document in background (non-blocking)
-  processDocument(doc.id, filePath, fileType, admin).catch((err) => {
-    console.error("Document processing failed:", err);
-  });
+  // Process document after the response is sent.
+  // waitUntil keeps the Vercel serverless function alive until processing
+  // completes, preventing the function from being frozen mid-pipeline.
+  waitUntil(
+    processDocument(doc.id, filePath, fileType, admin).catch((err) => {
+      console.error("Document processing failed:", err);
+    })
+  );
 
   return NextResponse.json(doc);
 }
